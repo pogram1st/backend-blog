@@ -8,7 +8,7 @@ import { handleValidationErrors, checkAuth } from './utils/index.js';
 import { UserControllers, PostController } from './controllers/index.js';
 
 mongoose
-  .connect(process.env.MONGODB_URI)
+  .connect('mongodb+srv://admin:1234@nodejs.bgwyrni.mongodb.net/test')
   .then(() => console.log('DB OK'))
   .catch((err) => console.warn(`DB ${err}`)); // Подключились к нашей бд
 
@@ -49,6 +49,7 @@ app.get('/auth/me', checkAuth, UserControllers.getMe);
 app.get('/tags', PostController.getLastTags);
 
 app.get('/posts', PostController.getAll);
+app.get('/posts-popular', PostController.getAllPopular);
 app.get('/posts/:id', PostController.getOne);
 app.post('/posts', checkAuth, postCreateValidation, handleValidationErrors, PostController.create);
 app.delete('/posts/:id', checkAuth, PostController.remove);
@@ -59,6 +60,7 @@ app.patch(
   handleValidationErrors,
   PostController.update,
 );
+app.post('/addcomment', checkAuth, handleValidationErrors, PostController.addComment);
 
 app.listen(process.env.PORT || 4444, (err) => {
   if (err) {

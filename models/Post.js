@@ -15,13 +15,18 @@ const PostSchema = new mongoose.Schema(
       default: [],
     },
     user: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.ObjectId, //Подключаем базу пользователей
       ref: 'User',
       required: true,
     },
     imageUrl: String,
     viewsCount: {
       type: Number,
+    },
+    comments: {
+      type: Array,
+      required: true,
+      default: [],
     },
   },
   {

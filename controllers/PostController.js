@@ -1,4 +1,5 @@
 import PostModel from '../models/Post.js';
+import UserModel from '../models/User.js';
 
 export const getLastTags = async (req, res) => {
   try {
@@ -8,7 +9,7 @@ export const getLastTags = async (req, res) => {
       .flat()
       .slice(0, 5);
     const uniqueTags = tags.filter((value, index, arr) => {
-      return arr.indexOf(value) === index; // Возвращаем только уникальные элементы
+      return arr.indexOf(value) === index && value !== ''; // Возвращаем только уникальные элементы
     }); // То есть возвращаем элементы чей индекс попался первым [1, 2, 1, 2] вторая еденица и двойка уже не попадет, так
     // как их индекс не совпадет с первым, тем самым мы отсеиваем ненужное
     res.json(uniqueTags);
@@ -27,6 +28,7 @@ export const create = async (req, res) => {
       imageUrl: req.body.imageUrl,
       tags: req.body.tags,
       user: req.userId,
+      comments: [],
     });
 
     const post = await doc.save();
@@ -41,7 +43,18 @@ export const create = async (req, res) => {
 
 export const getAll = async (req, res) => {
   try {
-    const posts = await PostModel.find().populate('user').exec(); // для связи 2х таблиц
+    const posts = await PostModel.find().sort({ createdAt: -1 }).populate('user').exec(); // для связи 2х таблиц
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({
+      message: 'Не получить статьи',
+    });
+  }
+};
+
+export const getAllPopular = async (req, res) => {
+  try {
+    const posts = await PostModel.find().sort({ viewsCount: -1 }).populate('user').exec(); // для связи 2х таблиц
     res.json(posts);
   } catch (err) {
     res.status(500).json({
@@ -135,6 +148,36 @@ export const update = async (req, res) => {
       },
     );
     res.json({ succerss: true });
+  } catch (err) {
+    res.status(500).json({
+      message: 'Не удалось обновить статью',
+      err: err,
+    });
+  }
+};
+
+export const addComment = async (req, res) => {
+  try {
+    const postId = req.body.id;
+    const comment = req.body.valueInput;
+    const comments = req.body.comments;
+    const user = await UserModel.findById(req.userId);
+
+    const objectComm = {
+      commentText: comment,
+      user: user,
+    };
+    const arr = [...comments, objectComm];
+    await PostModel.updateOne(
+      {
+        _id: postId,
+      },
+      {
+        comments: arr,
+        user: req.userId,
+      },
+    );
+    res.json({ arr: arr });
   } catch (err) {
     res.status(500).json({
       message: 'Не удалось обновить статью',
