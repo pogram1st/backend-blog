@@ -7,6 +7,9 @@ import { registerValidation, loginValidation, postCreateValidation } from './val
 import { handleValidationErrors, checkAuth } from './utils/index.js';
 import { UserControllers, PostController } from './controllers/index.js';
 
+const AWS = require('aws-sdk');
+const s3 = new AWS.S3();
+
 mongoose
   .connect('mongodb+srv://admin:1234@nodejs.bgwyrni.mongodb.net/test')
   .then(() => console.log('DB OK'))
@@ -18,10 +21,10 @@ const storage = multer.diskStorage({
   // Используем библиотеку мультер для загрузки файлов
   destination: (_, __, cb) => {
     // Говорим куда сохранять файл
-    if (!fs.existsSync('uploads')) {
-      fs.mkdirSync('uploads');
+    if (!fs.existsSync('.output/static/uploads')) {
+      fs.mkdirSync('.output/static/uploads');
     }
-    cb(null, 'uploads');
+    cb(null, '.output/static/uploads');
   },
   filename: (_, file, cb) => {
     // И под каким именем его сохранить
@@ -32,7 +35,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage }); // Далее объясняем мультеру какое хранилище использовать
 app.use(cors());
 app.use(express.json()); //Для того чтобы наше приложение мого читать JSON формат
-app.use('/uploads', express.static('uploads')); // Здесь говорим если придет гет запрос пом=смотри есть ли в этой папке такой файл
+app.use('/uploads', express.static('.output/static/uploads')); // Здесь говорим если придет гет запрос пом=смотри есть ли в этой папке такой файл
 
 app.post('/upload', checkAuth, upload.single('image'), (req, res) => {
   res.json({
