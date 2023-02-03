@@ -8,7 +8,7 @@ import { handleValidationErrors, checkAuth } from './utils/index.js';
 import { UserControllers, PostController } from './controllers/index.js';
 
 mongoose
-  .connect('mongodb+srv://admin:1234@nodejs.bgwyrni.mongodb.net/test')
+  .connect(process.env.connect_db)
   .then(() => console.log('DB OK'))
   .catch((err) => console.warn(`DB ${err}`)); // Подключились к нашей бд
 
